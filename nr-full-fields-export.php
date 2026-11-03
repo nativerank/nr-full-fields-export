@@ -4,7 +4,7 @@
 Plugin Name: NR Full Fields Export
 Plugin URI: http://URI_Of_Page_Describing_Plugin_and_Updates
 Description: Exports all page data (H1, Title Tags, Metadata, site structure, and custom fields) to CSV directly from the admin GUI - no terminal/WP-CLI step required.
-Version: 1.1
+Version: 1.11
 Author: NativeRank
 Author URI: http://URI_Of_The_Plugin_Author
 License: A "Slug" license name e.g. GPL2
@@ -341,7 +341,7 @@ function nr_full_export_page() {
 
 	?>
     <div class="wrap">
-        <h1>NR Full Export & CSV Viewer</h1>
+        <h1>NR Full Site Structure & Custom Fields Export</h1>
 
         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block">
 			<?php wp_nonce_field( 'nr_full_run_export' ); ?>
