@@ -17,7 +17,7 @@ require 'lib/plugin-update-checker/plugin-update-checker.php';
 
 add_action( 'plugins_loaded', function () {
 	\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-		'https://github.com/NativeRank/nr-full-fields-export/',
+		'https://wp-plugins.nativerank.com/wp-update-server/?action=get_metadata&slug=nr-full-fields-export',
 		__FILE__,
 		'nr-full-fields-export'
 	);

@@ -1,0 +1,27 @@
+name: Build and attach release zip
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Actions are pinned to exact commits: the upload step holds the update server's SSH key.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Deploy files to server
+        uses: sahil-io/release-upload-sftp@f950be7ff86de2a61f5f6c026baa35c084c942f3 # 4.2
+        with:
+          package_name: 'nr-full-fields-export'
+          username: 'bitnami'
+          server: '${{ secrets.WP_PLUGINS_SERVER_IP }}'
+          port: 22
+          ssh_private_key: ${{ secrets.WP_PLUGINS_SSH_PRIVATE_KEY }}
+          local_path: './*'
+          remote_path: ${{ secrets.WP_PLUGINS_REMOTE_PATH}}
