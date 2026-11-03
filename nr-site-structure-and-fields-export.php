@@ -17,9 +17,9 @@ require 'lib/plugin-update-checker/plugin-update-checker.php';
 
 add_action( 'plugins_loaded', function () {
 	\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-		'https://github.com/NativeRank/nr-full-export/',
+		'https://github.com/NativeRank/nr-site-structure-and-fields-export/',
 		__FILE__,
-		'nr-full-export'
+		'nr-site-structure-and-fields-export'
 	);
 } );
 
