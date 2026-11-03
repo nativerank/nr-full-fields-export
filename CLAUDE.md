@@ -89,47 +89,44 @@ Uses the bundled `YahnisElsts/plugin-update-checker` library
 
 ```php
 \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-    'https://wp-plugins.nativerank.com/wp-update-server/?action=get_metadata&slug=nr-full-fields-export',
+    'https://github.com/NativeRank/nr-full-fields-export/',
     __FILE__,
     'nr-full-fields-export'
 );
 ```
 
-This now checks NativeRank's own self-hosted **wp-update-server** at
-`wp-plugins.nativerank.com` (same mechanism as `nr-heavy-seo-export` and
-`nr-financing-calculator`), not GitHub Releases directly. A GitHub Actions
-workflow at `.github/workflows/release.yml` (modeled on
-`nr-financing-calculator`'s) triggers on `release: created` and SFTPs the
-built plugin to that server, using org-level secrets
-(`WP_PLUGINS_SERVER_IP`, `WP_PLUGINS_SSH_PRIVATE_KEY`,
-`WP_PLUGINS_REMOTE_PATH`) shared across NativeRank plugin repos — not yet
-confirmed whether those secrets are scoped to include this repo; that's
-verified empirically the first time a release is published (see
-`CHANGELOG`/git history around the switch for context). Unlike
-`nr-financing-calculator`, this plugin has no `composer.json` (the
-update-checker library is vendored directly under `lib/`), so the workflow
-skips the `composer install` step.
+Note: the plugin folder, main file, update-checker URL, and update-checker
+slug all use the `nr-full-fields-export` name (matching the
+GitHub repo, which is what the update checker and WordPress's plugin-update
+machinery key off of). Internal PHP identifiers — the `NR_FULL_EXPORTER`
+class, `NR_FULL_EXPORT_FOLDER`/`NR_FULL_EXPORT_URL` constants, `nr_full_*`
+function and action names, the `nr-full-export-all` WP-CLI command, and the
+`nr-full-exports` uploads subfolder — were deliberately **left as `nr_full_*`**
+(shorter, and already proven not to collide with `nr-heavy-seo-export`'s
+names). Don't "fix" this mismatch — it's intentional.
 
-Decision history:
-- Originally used GitHub Releases directly (no self-hosted server), chosen
-  because the repo was public and a self-hosted-server URL/access hadn't
-  been confirmed yet.
-- Switched to the self-hosted `wp-update-server` approach once
-  `nr-financing-calculator`'s working release pipeline confirmed the
-  server/secrets setup. This also decouples the update mechanism from the
-  GitHub repo's visibility — a private repo no longer requires a
-  per-site GitHub access token, since WordPress installs never talk to
-  GitHub's API directly.
-
-Note: the plugin folder, main file, and update-checker slug all use the
-`nr-full-fields-export` name (matching the GitHub repo and the
-`slug=nr-full-fields-export` query param above). Internal PHP identifiers —
-the `NR_FULL_EXPORTER` class, `NR_FULL_EXPORT_FOLDER`/`NR_FULL_EXPORT_URL`
-constants, `nr_full_*` function and action names, the `nr-full-export-all`
-WP-CLI command, and the `nr-full-exports` uploads subfolder — were
-deliberately **left as `nr_full_*`** (shorter, and already proven not to
-collide with `nr-heavy-seo-export`'s names). Don't "fix" this mismatch —
-it's intentional.
+This checks **GitHub Releases** directly — no self-hosted update server
+(unlike `nr-heavy-seo-export`/`nr-financing-calculator`, which use
+NativeRank's own `wp-plugins.nativerank.com` wp-update-server). Decision
+history:
+- A self-hosted-server approach (SFTP-deploy-on-release, mirroring
+  `nr-financing-calculator`'s `.github/workflows/release.yml`) was tried and
+  reverted: the `WP_PLUGINS_SERVER_IP`/`WP_PLUGINS_SSH_PRIVATE_KEY`/
+  `WP_PLUGINS_REMOTE_PATH` secrets those other repos rely on turned out to
+  be scoped in a way that didn't reach this repo (confirmed by an actual
+  failed deploy run — "Input required and not supplied: server"), and fixing
+  that requires an org owner, which wasn't available. Rather than block on
+  that, or duplicate those secrets at the repo level pointed at
+  infrastructure with no independent destination server to deploy to, the
+  plugin reverted to checking GitHub Releases directly.
+- Considered a private repo, but that would require every WordPress install
+  to have a GitHub access token configured (in `wp-config.php`) just to check
+  for updates — and since the plugin has no secrets to protect, and the
+  token would either need baking into the distributed plugin file (readable
+  by anyone with file access on any site running it) or manual per-site
+  wp-config edits (ongoing busywork across every current and future site),
+  neither trade-off was worth it. **Decision: public repo**, so no token is
+  needed anywhere.
 
 ## Current state / what's left to do
 
@@ -141,33 +138,16 @@ title before any of this was `nr-full-export`.
 
 Rename and push are done (commit `07b5542`, pushed to `origin/main`;
 `origin` now also points at the renamed `nativerank/nr-full-fields-export`
-GitHub repo). Remaining steps:
+GitHub repo). A `v1.0` GitHub Release has been published. Remaining steps:
 
-1. **Publish a GitHub Release** tagged `v1.0` (matching the `Version: 1.0`
-   header in `nr-full-fields-export.php`). This both satisfies the update
-   checker (needs something to compare against) and triggers
-   `.github/workflows/release.yml`, which SFTPs the build to
-   `wp-plugins.nativerank.com`.
-2. **Watch that Action run** (repo → Actions tab) to confirm the
-   `WP_PLUGINS_SERVER_IP` / `WP_PLUGINS_SSH_PRIVATE_KEY` /
-   `WP_PLUGINS_REMOTE_PATH` secrets are actually scoped to this repo — not
-   yet confirmed. A failed "Deploy files to server" step means those
-   org-level secrets need to be added/extended to include this repo (needs
-   an org owner, since repo-admin access alone couldn't confirm their scope
-   via the Settings → Secrets UI).
-3. **Verify end-to-end** on a real WordPress install: confirm wp-admin →
+1. **Verify end-to-end** on a real WordPress install: confirm wp-admin →
    Dashboard → Updates (or the Plugins list) actually shows an "update
    available" notice once a newer release is published. This has not been
    tested live yet. Also confirm the plugin is still active after the
    on-disk folder rename (WordPress tracks active plugins by
    `folder/file.php` path, so a rename can deactivate it — reactivate from
    wp-admin → Plugins if needed).
-4. **Decide repo visibility.** Now that updates route through the
-   self-hosted server rather than GitHub's API, making the repo private no
-   longer requires a per-site GitHub access token — the earlier
-   public-repo decision was conditioned on the GitHub-Releases approach and
-   can be revisited.
-5. For every future change: bump the `Version:` header, commit, push,
+2. For every future change: bump the `Version:` header, commit, push,
    publish a new GitHub Release with a matching tag (e.g. `v1.1`).
 
 **Manual distribution zip:** a copy is also kept at
