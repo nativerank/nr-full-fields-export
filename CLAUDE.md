@@ -1,4 +1,4 @@
-# NR Full Export (repo: nr-site-structure-and-fields-export) — Project Summary
+# NR Full Fields Export (repo: nr-full-fields-export) — Project Summary
 
 ## What this is
 
@@ -85,18 +85,18 @@ class/constant/command declarations.
 
 Uses the bundled `YahnisElsts/plugin-update-checker` library
 (`lib/plugin-update-checker/`), wired up in
-`nr-site-structure-and-fields-export.php`:
+`nr-full-fields-export.php`:
 
 ```php
 \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-    'https://github.com/NativeRank/nr-site-structure-and-fields-export/',
+    'https://github.com/NativeRank/nr-full-fields-export/',
     __FILE__,
-    'nr-site-structure-and-fields-export'
+    'nr-full-fields-export'
 );
 ```
 
 Note: the plugin folder, main file, update-checker URL, and update-checker
-slug all use the `nr-site-structure-and-fields-export` name (matching the
+slug all use the `nr-full-fields-export` name (matching the
 GitHub repo, which is what the update checker and WordPress's plugin-update
 machinery key off of). Internal PHP identifiers — the `NR_FULL_EXPORTER`
 class, `NR_FULL_EXPORT_FOLDER`/`NR_FULL_EXPORT_URL` constants, `nr_full_*`
@@ -118,21 +118,21 @@ This checks **GitHub Releases** directly — no self-hosted update server
 
 ## Current state / what's left to do
 
-The GitHub repo exists: `NativeRank/nr-site-structure-and-fields-export`
-(public). Note it's named differently than the original working title
-(`nr-full-export`) — the plugin folder and main file were renamed to match
-the repo (see Auto-updates section above for exactly what was and wasn't
-renamed).
+The GitHub repo is named `NativeRank/nr-full-fields-export` (public), and the
+plugin folder/main file were renamed to match (it went through an
+intermediate name, `nr-site-structure-and-fields-export`, before settling
+here — shortened because that name was too long). The original working
+title before any of this was `nr-full-export`.
 
 Remaining steps:
 
-1. **Push it** (remote already added, see below):
+1. **Push it**:
    ```
-   cd "C:\Users\Web\Documents\WebstormProjects\rmpb_full_stage\wp-content\plugins\nr-site-structure-and-fields-export"
+   cd "C:\Users\Web\Documents\WebstormProjects\rmpb_full_stage\wp-content\plugins\nr-full-fields-export"
    git push -u origin main
    ```
 2. **Publish a GitHub Release** tagged `v1.0` (matching the `Version: 1.0`
-   header in `nr-site-structure-and-fields-export.php`) — the update checker
+   header in `nr-full-fields-export.php`) — the update checker
    has nothing to compare against until a release exists.
 3. **Verify end-to-end** on a real WordPress install: confirm wp-admin →
    Dashboard → Updates (or the Plugins list) actually shows an "update
@@ -144,17 +144,15 @@ Remaining steps:
 4. For every future change: bump the `Version:` header, commit, push,
    publish a new GitHub Release with a matching tag (e.g. `v1.1`).
 
-**Also stale:** `D:\Tools\plugins\nr-full-export.zip` was a manual
-distribution zip kept in sync during earlier iterations, but it predates the
-update-checker/git work in this summary — it's out of date, doesn't include
-`lib/plugin-update-checker/`, and now has the pre-rename filename too. Once
-GitHub Releases are live, that zip workflow can probably be retired in favor
-of installing from a Release; if you still want a zip made, make sure to
-exclude `.git/` from it.
+**Manual distribution zip:** a copy is also kept at
+`D:\Tools\plugins\nr-full-fields-export.zip` (built via `git archive`, so it
+excludes `.git/`/`.idea/` and mirrors exactly what's pushed to GitHub) for
+manual installs outside the update-checker/Releases flow. Regenerate it after
+any change that should be manually distributable.
 
 ## Key file locations
 
-- This plugin: `wp-content/plugins/nr-site-structure-and-fields-export/nr-site-structure-and-fields-export.php`
+- This plugin: `wp-content/plugins/nr-full-fields-export/nr-full-fields-export.php`
 - Original (terminal-only) plugin: `wp-content/plugins/nr-heavy-seo-export/nr-heavy-seo-export.php`
 - Source of truth for `attr:`/`cf:` conventions: `wp-content/plugins/nativerank-seo-wp/src/inc/admin/{exporter.php,importer.php,cli.php}`
 - Local WP install root: `C:\Users\Web\Documents\WebstormProjects\rmpb_full_stage`
